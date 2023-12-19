@@ -1,4 +1,5 @@
 #!/bin/bash
+
 count_i_f="/var/cst/count_inst.log"
 count_b_f="/var/cst/count_boot.log"
 count_bt_f="/var/cst/last_boot.log"
