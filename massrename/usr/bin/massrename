@@ -1,0 +1,102 @@
+#!/bin/bash
+
+function printhelp {
+    echo "Использование: massrename [ПАРАМЕТР ...] [РАСШИРЕНИЕ=.txt] [РАЗМЕР=0] [КАТАЛОГ=./]"
+    echo "Добавляет РАСШИРЕНИЕ к имени файла из КАТАЛОГА, если этот файл имеет размер больше, чем РАЗМЕР и начинается с цифры."
+    echo -e "\t -e, --extension <extension> \t Задает РАСШИРЕНИЕ как extension"
+    echo -e "\t -s, --size <size> \t\t Задает РАЗМЕР как size"
+    echo -e "\t -p, --path <path> \t\t Задает КАТАЛОГ как path"
+    echo -e "\t -q, --quiet \t\t\t Отключает вывод информации о действиях"
+    echo -e "\t -h, --help  \t\t\t Выводит эту справку"
+}
+
+posargs=()
+quiet=""
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -e|--extension)
+        extension="$2"
+        shift
+        shift
+        ;;
+
+    -p|--path)
+        path="$2"
+        shift
+        shift
+        ;;
+
+    -s|--size)
+        size="$2"
+        shift
+        shift
+        ;;
+
+    -q|--quiet)
+        quiet="true"
+        shift
+        ;;
+
+    -h|--help)
+        printhelp
+        exit 0
+        ;;
+
+    -*|--*)
+        echo "Unknown option: $1"
+        exit -1
+        ;;
+    
+    *)
+        posargs+=("$1")
+        shift
+        ;;
+  esac
+done
+
+if [ -z $extension ]; then
+    if [ "${#posargs[@]}" -ge "1" ]; then
+            extension="${posargs[0]}"
+    else
+        extension=".txt"
+    fi
+fi
+
+if [ -z $size ]; then
+    if [ "${#posargs[@]}" -ge "2" ]; then
+            size="${posargs[1]}"
+    else
+        size="0"
+    fi
+fi
+
+if [ -z $path ]; then
+    if [ "${#posargs[@]}" -ge "3" ]; then
+        path="${posargs[2]}"
+    else
+        path="./"
+    fi
+fi
+
+files=`ls -p $path | grep -v /$`
+
+for i in ${files[@]}; do
+    if [ -z $quiet ]; then
+        echo -e "\tfile $i:"
+    fi
+    if [ "$(stat -c %s $path/$i)" -gt $size ]; then
+        if [ -z $quiet ]; then
+            echo -e "\t\t$i greater than $size"
+        fi
+
+        if [ ! -z "$(head -q -c1 $path/$i | grep "[0-9]")" ]; then
+            if [ -z $quiet ]; then
+                echo -e "\t\t\t$i has first digit, renaming to $path$i$extension"
+            fi
+            
+            $(mv $path$i $path$i$extension)
+        fi
+    fi
+done
+

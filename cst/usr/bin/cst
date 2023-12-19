@@ -1,0 +1,44 @@
+#!/bin/bash
+count_i_f="/var/cst/count_inst.log"
+count_b_f="/var/cst/count_boot.log"
+count_bt_f="/var/cst/last_boot.log"
+runtime_dir="/var/cst"
+
+if [ ! -e "$runtime_dir" ]; then
+mkdir "$runtime_dir"
+fi
+
+if [ ! -e "$count_i_f" ]; then 
+touch "$count_i_f"
+echo "0" > "$count_i_f"
+fi
+
+currentstarts=$(<"$count_i_f")
+((currentstarts++))
+echo "CST started since install: $currentstarts"
+echo "$currentstarts" > "$count_i_f"
+
+if [ ! -e "$count_b_f" ]; then
+touch "$count_b_f"
+echo "0" > "$count_b_f"
+fi
+
+if [ ! -e "$count_bt_f" ]; then
+touch "$count_bt_f"
+stat -c %Z /proc/ > "$count_bt_f"
+fi
+
+lastboot_ts=$(<"$count_bt_f")
+currentboot_ts=`stat -c %Z /proc/`
+
+
+if [ "$currentboot_ts" \> "$lastboot_ts" ]; then
+echo "$currentboot_ts" > "$count_bt_f"
+echo "0" > "$count_b_f"
+fi
+
+currentstarts=$(<"$count_b_f")
+((currentstarts++))
+echo "CST started since reboot: $currentstarts"
+echo "$currentstarts" > "$count_b_f"
+

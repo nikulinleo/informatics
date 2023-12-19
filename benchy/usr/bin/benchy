@@ -1,0 +1,219 @@
+#!/bin/bash
+
+function printhelp {
+    echo "Использование: benchy -КЛЮЧ[=ЗНАЧЕНИЕ]{1..5}"
+    echo "Проверяет время выполнения некоторых операций для оценки производительности компьютера"
+    echo -e "\t -r, --read[=РАЗМЕР] \t\t Чтение файла указанного РАЗМЕРА из текущей папки, по умолчанию 100M"
+    echo -e "\t -w, --write[=РАЗМЕР] \t\t Запись файла указанного РАЗМЕРА в текущую папку, по умолчанию 100M"
+    echo -e "\t -s1, --sort1[=КОЛИЧЕСТВО] \t Сортировка указанного КОЛИЧЕСТВА элементов с помощью сортировки пузырьком, по умолчанию 1000"
+    echo -e "\t -s2, --sort2[=КОЛИЧЕСТВО] \t Сортировка указанного КОЛИЧЕСТВА элементов с помощью сортировки выбором, по умолчанию 1000"
+    echo -e "\t -p, --primes[=КОЛИЧЕСТВО]  \t Нахождение указанного КОЛИЧЕСТВА простых чисел, по умолчанию 1000"
+    echo -e "\t -h, --help \t\t\t Вывод данной справочной информации"
+}
+
+function randomread {
+    file="$1/$RANDOM.tmp"
+    size="$2"
+    a=`fallocate -l $size $file`
+
+    start=`date +%s.%N`
+    output=`dd bs=$size count=1 if=$file of=/dev/null status=none`
+    end=`date +%s.%N`
+    echo -n "Time of reading file with size $size is "
+    echo "$end- $start" | bc
+
+    rm "$file"
+}
+
+function randomwrite {
+    file="$1/$RANDOM.tmp"
+    size="$2"
+
+    start=`date +%s.%N`
+    output=`dd bs=$size count=1 if=/dev/urandom of=$file status=none`
+    end=`date +%s.%N`
+    echo -n "Time of writing file with size $size is "
+    echo "$end - $start" | bc
+
+    rm "$file"
+}
+
+function randomsort1 {
+
+    size="$1"
+    array=()
+    for (( a = 0; a < size; a++ )); do
+        array+=""
+        array[$a]="$(expr $RANDOM % 10000)"
+    done
+    n=${#array[@]}
+
+    start=`date +%s.%N`
+    for (( i = 0 ; i < n-1 ; ++i )); do
+        for (( j = 0 ; j < n-i-1 ; ++j )); do
+            if (( array[$j] < array[$j+1] )); then
+                temp=${array[$j]}
+                array[$j]=${array[$j+1]}
+                array[$j+1]=$temp
+            fi
+        done
+    done
+    end=`date +%s.%N`
+    echo -n "Time of bubble sorting of $size elements is "
+    echo "$end - $start" | bc
+
+}
+
+function randomsort2 {
+    size=$1
+    array=()
+    for (( a = 0; a < size; a++ )); do
+        array+=""
+        array[$a]="$(expr $RANDOM % 10000)"
+    done
+
+
+ 
+    n=${#array[@]}
+    sortedarray=()
+    maxelem=0
+    maxind=0
+
+    start=`date +%s.%N`
+
+    for (( i = 0; i < n; ++i )); do
+        maxelem=-1
+        maxind=0
+        for j in ${!array[@]}; do
+            if (( maxelem < array[$j] )); then
+                maxelem="${array[j]}"
+                maxind=$j
+            fi
+        done
+        sortedarray+=""
+        sortedarray[i]="$maxelem"
+        unset array[$maxind]
+    done
+
+    end=`date +%s.%N`
+    echo -n "Time of selection sorting of $size elements is "
+    echo "$end - $start" | bc
+
+}
+
+function findprimes {
+    function is_prime() {
+        local number=$1
+        if ((number < 2)); then
+            return 1
+        fi
+        
+        for ((div=2; div<=number/2; div++)); do
+            if ((number % div == 0)); then
+            return 1
+            fi
+        done
+        
+        return 0
+    }
+
+    n="$1"
+    primes=()
+
+    start=`date +%s.%N`
+
+    for (( i=2; n > 0; i++)); do
+        if is_prime $i; then
+            primes+=("$i")
+            ((n--))
+        fi
+    done
+
+    end=`date +%s.%N`
+    echo -n "Time of searching of $1 prime numbers is "
+    echo "$end - $start" | bc
+
+}
+
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -r=*|--read=*)
+        readsize="${1#*=}"
+        shift
+        ;;
+    -r|--read)
+        readsize="100M"
+        shift
+        ;;
+
+    -w=*|--write=*)
+        writesize="${1#*=}"
+        shift
+        ;;
+    -w|--write)
+        writesize="100M"
+        shift
+        ;;
+
+    -s1=*|--sort1=*)
+        sort1size="${1#*=}"
+        shift
+        ;;
+
+    -s1|--sort1)
+        sort1size="1000"
+        shift
+        ;;
+
+    -s2=*|--sort2=*)
+        sort2size="${1#*=}"
+        shift
+        ;;
+
+    -s2|--sort2)
+        sort2size="1000"
+        shift
+        ;;
+
+    -p=*|--primes=*)
+        primes="${1#*=}"
+        shift
+        ;;
+
+    -p|--primes)
+        primes="1000"
+        shift
+        ;;
+
+    -h|--help)
+        printhelp
+        exit 0
+        ;;
+
+    -*|--*)
+        echo "Unknown option: $1"
+        exit -1
+        ;;
+  esac
+done
+
+if [ ! -z $readsize ]; then
+    randomread $PWD $readsize
+fi
+
+if [ ! -z $writesize ]; then
+    randomwrite $PWD $writesize 
+fi
+
+if [ ! -z $sort1size ]; then
+    randomsort1 $sort1size
+fi
+
+if [ ! -z $sort2size ]; then
+    randomsort2 $sort2size
+fi
+
+if [ ! -z $primes ]; then
+    findprimes $primes
+fi

@@ -1,0 +1,5 @@
+Package: massrename
+Version: 0.1
+Maintainer: Nikulin Lev
+Architecture: all
+Description: program that appends extension to files that meet the conditions

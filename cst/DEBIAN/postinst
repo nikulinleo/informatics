@@ -1,0 +1,17 @@
+#!/bin/bash
+if [ ! -e "/var/" ]; then
+	mkdir "/var/"
+fi
+
+if [ ! -e "/var/cst" ]; then
+	mkdir "/var/cst"
+fi
+
+chmod +777 "/var/cst"
+
+touch "/var/cst/count_boot.log"
+echo "0" > "/var/cst/count_boot.log"
+touch "/var/cst/count_inst.log"
+echo "0" > "/var/cst/count_inst.log"
+touch "/var/cst/last_boot.log"
+stat -c %Z /proc/ > "/var/cst/last_boot.log"

@@ -1,0 +1,5 @@
+Package: benchy
+Version: 0.1
+Maintainer: Nikulin Lev
+Architecture: all
+Description: simple benchmark for your PC

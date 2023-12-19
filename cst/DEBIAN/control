@@ -1,0 +1,5 @@
+Package: cst
+Version: 0.1
+Maintainer: Nikulin Lev
+Architecture: all
+Description: simple program that counts how much times it has been launched
