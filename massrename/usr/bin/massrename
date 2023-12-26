@@ -55,7 +55,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [ -z $extension ]; then
+if [ -z "$extension" ]; then
     if [ "${#posargs[@]}" -ge "1" ]; then
             extension="${posargs[0]}"
     else
@@ -63,7 +63,7 @@ if [ -z $extension ]; then
     fi
 fi
 
-if [ -z $size ]; then
+if [ -z "$size" ]; then
     if [ "${#posargs[@]}" -ge "2" ]; then
             size="${posargs[1]}"
     else
@@ -71,7 +71,7 @@ if [ -z $size ]; then
     fi
 fi
 
-if [ -z $path ]; then
+if [ -z "$path" ]; then
     if [ "${#posargs[@]}" -ge "3" ]; then
         path="${posargs[2]}"
     else
@@ -79,7 +79,7 @@ if [ -z $path ]; then
     fi
 fi
 
-files=`ls -p $path | grep -v /$`
+files=`ls -p "$path" | grep -v /$`
 
 for i in ${files[@]}; do
     if [ -z $quiet ]; then
@@ -95,7 +95,7 @@ for i in ${files[@]}; do
                 echo -e "\t\t\t$i has first digit, renaming to $path$i$extension"
             fi
             
-            $(mv $path$i $path$i$extension)
+            $(mv "$path$i" "$path$i$extension")
         fi
     fi
 done

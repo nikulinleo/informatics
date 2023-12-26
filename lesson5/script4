@@ -1,0 +1,27 @@
+#!/bin/bash
+if [ ! -e temp1 ]
+then
+	read -p "Enter folder: " dir
+	ls -l $dir | grep -P "^d([-r][-w][-x]){3}" > temp1
+	read -p "Enter foldername: " fname
+	let folders=`wc -l temp1`
+	for (( line=1; line<=$folders; line++ ))
+	do
+		cline="`head -$line temp1 | tail -1 | grep -oP "[^ ]+$"`"
+		if [[ "$cline" > "$fname" ]]
+		then
+			echo "$fname could be in position $line"
+			rm temp1
+			exit
+		elif [[ "$cline" == "$fname" ]]
+		then 
+			echo "Folder exists"
+			rm temp1
+			exit
+		fi 
+	done
+	echo "$fname will be the last folder"
+	rm temp1
+else
+	echo "No space for temp file"
+fi

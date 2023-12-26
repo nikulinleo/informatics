@@ -1,0 +1,18 @@
+#!/bin/bash
+dir=$HOME
+files=$(ls -lA "$dir" | grep -P "^[-]([-r][-w][-x]){3}" | wc -l)
+dirs=`ls -lA "$dir" | grep -P "^d([-r][-w][-x]){3}" | wc -l`
+
+echo "There are $files files in $dir"
+echo "There are $dirs directories in $dir"
+echo "There are $(($dirs + $files)) objects in $dir"
+
+if [ $files -gt $dirs ]
+then
+	echo "There are more files than directories"
+elif [ $files -eq $dirs ]
+then
+	echo "Numbers of directories and files are equal"
+else
+	echo "There are more directories than files"
+fi

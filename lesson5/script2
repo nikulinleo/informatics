@@ -1,0 +1,3 @@
+#!/bin/bash
+name="Lev Nikulin"
+echo "Real name of user $USER is $name"
